@@ -1,0 +1,12 @@
+cache/
+forecasts/
+videos/
+sec-edgar-filings/
+config.json
+
+# Local Pipeline Data & Environments
+.venv/
+__pycache__/
+TrainingData/
+stockvision-deploy/data/
+*.h5
