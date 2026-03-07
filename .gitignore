@@ -1,11 +1,5 @@
-cache/
-forecasts/
-videos/
-sec-edgar-filings/
+# Files that CANNOT be uploaded safely:
 config.json
-
-# Local Pipeline Data & Environments
 .venv/
 __pycache__/
 TrainingData/indicators_data/
-stockvision-deploy/data/
