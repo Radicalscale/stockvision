@@ -47,6 +47,10 @@ class PgConnWrapper:
     def close(self):
         self._conn.close()
 
+def is_pg(conn):
+    """Check if the connection is a PostgreSQL connection."""
+    return isinstance(conn, PgConnWrapper) or not isinstance(conn, sqlite3.Connection)
+
 def get_db_connection():
     db_url = os.environ.get("DATABASE_URL")
     if db_url:
