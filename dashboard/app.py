@@ -129,10 +129,11 @@ def handle_exception(e):
         return jsonify({"error": str(e)}), e.code
     # Log the full traceback for 500 errors
     traceback.print_exc()
+    # Always return traceback in JSON for easier remote debugging
     return jsonify({
         "error": "Internal Server Error",
         "message": str(e),
-        "traceback": traceback.format_exc() if app.debug or os.environ.get("DEBUG") else None
+        "traceback": traceback.format_exc()
     }), 500
 
 # ── ROUTES ───────────────────────────────────────────────────────────────────
@@ -730,7 +731,7 @@ def get_recommendations():
             if len(recs) >= 5:
                 break
 
-        return jsonify({"recommendations": recs, "as_of": latest_date})
+        return jsonify({"recommendations": recs, "as_of": str(latest_date)})
 
     except Exception as e:
         print(f"[Recommendations Error] {e}")
