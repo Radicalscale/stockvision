@@ -10,6 +10,8 @@ from flask import Flask, jsonify, request, send_from_directory, make_response, s
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
+import traceback
+import sys
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.secret_key = "super-secret-key-change-this-in-production" # Secure session key
@@ -104,6 +106,7 @@ def list_tickers():
         result = [{"ticker": row["ticker"], "name": row["company_name"]} for row in tickers_rows]
         return jsonify({"tickers": result, "count": len(result)})
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/stock/<ticker>")
@@ -200,6 +203,7 @@ def get_stock_data(ticker):
         })
         
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -239,6 +243,7 @@ def search_tickers():
         return jsonify({"results": results})
         
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
