@@ -17,7 +17,22 @@ DB_PATH           = os.path.join(BASE_DIR, "stock_data.db")
 NAMES_FILE        = os.path.join(BASE_DIR, "stockvision-deploy", "company_names.json")
 
 def get_db_connection():
-    return sqlite3.connect(DB_PATH)
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url:
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
+        # Handle Railway's potentially different connection string formats
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
+        conn = psycopg2.connect(db_url)
+        return conn
+    else:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+def is_pg(conn):
+    return not isinstance(conn, sqlite3.Connection)
 
 def ingest_company_names(conn):
     """Load cached company names from JSON into the tickers table."""
@@ -32,12 +47,17 @@ def ingest_company_names(conn):
             
         cursor = conn.cursor()
         
-        # Insert using INSERT OR REPLACE (upsert)
         for ticker, name in names_dict.items():
-            cursor.execute(
-                "INSERT OR REPLACE INTO tickers (ticker, company_name) VALUES (?, ?)",
-                (ticker, name)
-            )
+            if is_pg(conn):
+                cursor.execute(
+                    "INSERT INTO tickers (ticker, company_name) VALUES (%s, %s) ON CONFLICT (ticker) DO UPDATE SET company_name = EXCLUDED.company_name",
+                    (ticker, name)
+                )
+            else:
+                cursor.execute(
+                    "INSERT OR REPLACE INTO tickers (ticker, company_name) VALUES (?, ?)",
+                    (ticker, name)
+                )
             
         conn.commit()
         print(f"[OK] Ingested {len(names_dict)} company names.")
@@ -102,14 +122,22 @@ def ingest_stock_data(conn):
             db_df["ticker"] = ticker
             
             # Rename for DataFrame.to_sql
-            # Using append mode. To handle duplicates (upsert), we ideally use a temporary table
-            # but for bulk load, to_sql with if_exists='append' is faster if we delete first.
-            
-            # Let's delete existing data for this ticker to avoid primary key conflicts on update
-            conn.execute("DELETE FROM daily_stock_data WHERE ticker = ?", (ticker,))
-            
             # Write to database
-            db_df.to_sql("daily_stock_data", conn, if_exists="append", index=False)
+            if is_pg(conn):
+                # Use psycopg2 batch insert or efficient multi-row INSERT
+                # For simplicity and consistency with migrate script:
+                from psycopg2.extras import execute_values
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM daily_stock_data WHERE ticker = %s", (ticker,))
+                
+                # Convert DataFrame to list of tuples
+                args = [tuple(x) for x in db_df.to_numpy()]
+                cols = ",".join(db_df.columns)
+                execute_values(cursor, f"INSERT INTO daily_stock_data ({cols}) VALUES %s ON CONFLICT (ticker, date) DO NOTHING", args)
+            else:
+                # SQLite logic
+                conn.execute("DELETE FROM daily_stock_data WHERE ticker = ?", (ticker,))
+                db_df.to_sql("daily_stock_data", conn, if_exists="append", index=False)
             
             # Also ensure ticker exists in tickers table if it wasn't caught by the names JSON
             conn.execute(
@@ -227,11 +255,18 @@ def ingest_trade_signals(conn):
         ]
         db_df = df[cols_to_keep]
         
-        # Delete existing to prevent PK violations on re-run
-        conn.execute("DELETE FROM trade_signals")
-        
-        # Insert
-        db_df.to_sql("trade_signals", conn, if_exists="append", index=False)
+        if is_pg(conn):
+            from psycopg2.extras import execute_values
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM trade_signals")
+            cols = ",".join(db_df.columns)
+            args = [tuple(x) for x in db_df.to_numpy()]
+            execute_values(cursor, f"INSERT INTO trade_signals ({cols}) VALUES %s ON CONFLICT (ticker, buy_date, horizon) DO NOTHING", args)
+        else:
+            # Delete existing to prevent PK violations on re-run
+            conn.execute("DELETE FROM trade_signals")
+            # Insert
+            db_df.to_sql("trade_signals", conn, if_exists="append", index=False)
         conn.commit()
         
         print(f"[OK] Ingested {len(db_df)} total trade signals (Historical + Live).")
