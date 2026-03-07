@@ -19,4 +19,4 @@ Thumbs.db
 
 # Large data — upload directly to Railway Volume via CLI
 # Uncomment if NOT using Git LFS for CSVs:
-# data/
+data/

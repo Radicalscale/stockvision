@@ -78,18 +78,28 @@ def compute_horizon_thresholds(df):
         thresholds[h] = mu + 2 * sig
     return thresholds
 
-def add_features(df: pd.DataFrame) -> pd.DataFrame:
+def add_features(df: pd.DataFrame, drop_nans=True) -> pd.DataFrame:
     df["Target_1d"] = np.log(df["close"].shift(-1) / df["close"])
     df["Target_1w"] = np.log(df["close"].shift(-5) / df["close"])
     df["Target_1m"] = np.log(df["close"].shift(-21) / df["close"])
     df["Target_6m"] = np.log(df["close"].shift(-126) / df["close"])
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df.dropna(inplace=True)
+    
+    # We always need to drop rows where features are NaN (e.g. beginning of data for MA)
+    # But if drop_nans=False (inference), we DON'T drop based on Target_ columns
+    if drop_nans:
+        df.dropna(inplace=True)
+    else:
+        # For inference, only drop rows where feature columns are NaN
+        # We assume feature_cols will be known or we use a heuristic
+        # Let's just drop rows where 'close' is NaN as a proxy for raw data coverage
+        # and then handle the rest when features are scaled.
+        df.dropna(subset=["close"], inplace=True) 
     return df
 
 def process_stock(csv_path: Path, for_training=True):
     df = pd.read_csv(csv_path, parse_dates=["date"]).sort_values("date").reset_index(drop=True)
-    df = add_features(df)
+    df = add_features(df, drop_nans=for_training)
     if df.empty:
         return np.array([]), np.array([]), df, np.array([])
         
@@ -125,7 +135,7 @@ def process_stock(csv_path: Path, for_training=True):
 
 def process_stock_for_inference(csv_path: Path):
     df = pd.read_csv(csv_path, parse_dates=["date"]).sort_values("date").reset_index(drop=True)
-    df = add_features(df)
+    df = add_features(df, drop_nans=False)
     if df.empty:
         return np.array([]), np.array([]), np.array([]), df
 
@@ -265,7 +275,7 @@ def main():
     print("Fitting scaler...")
     for csv_path in all_csvs[:100]: # Sample 100 for speed if needed, or all
         df = pd.read_csv(csv_path, parse_dates=["date"]).sort_values("date").dropna()
-        df = add_features(df)
+        df = add_features(df, drop_nans=True)
         if df.empty: continue
         feat_cols = [c for c in df.columns if c not in CONFIG["EXCLUDED_COLS"]]
         if feature_cols is None: feature_cols = feat_cols
@@ -279,21 +289,20 @@ def main():
         
     scaler.fit(np.vstack(scaler_inputs))
 
-    # Cache
-    print("Caching preprocessed data...")
-    for csv_path in all_csvs:
-        cache_preprocessed_stock(Path(csv_path), train_cutoff, train_val_cutoff)
-
-    # Generators
-    train_gen = StockDataGenerator(all_csvs, split="train", shuffle=True)
-    val_gen = StockDataGenerator(all_csvs, split="val", shuffle=False)
-
-    # Model
     model_path = "lstm_model.h5"
     if os.path.exists(model_path):
-        print("Loading existing model...")
+        print(f"Loading existing model from {model_path}...")
         model = load_model(model_path, custom_objects={'MCDropout': MCDropout, 'Attention': Attention})
     else:
+        # Cache
+        print("Caching preprocessed data...")
+        for csv_path in all_csvs:
+            cache_preprocessed_stock(Path(csv_path), train_cutoff, train_val_cutoff)
+
+        # Generators
+        train_gen = StockDataGenerator(all_csvs, split="train", shuffle=True)
+        val_gen = StockDataGenerator(all_csvs, split="val", shuffle=False)
+
         print("Training model...")
         n_features = len(feature_cols)
         model = Sequential([

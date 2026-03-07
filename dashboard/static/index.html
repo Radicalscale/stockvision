@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script
     src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
   <style>
@@ -817,27 +818,32 @@
 
     /* Tabs Styling */
     .rpanel-tabs {
-      display: flex;
-      gap: 2px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
       background: rgba(0, 0, 0, 0.2);
-      padding: 4px;
+      padding: 8px;
       margin: 0 14px 16px;
-      border-radius: 12px;
+      border-radius: 16px;
       border: 1px solid var(--border);
     }
 
     .rp-tab {
-      flex: 1;
-      padding: 8px 4px;
+      padding: 10px 4px;
       text-align: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       color: var(--t2);
       cursor: pointer;
-      border-radius: 8px;
+      border-radius: 10px;
       transition: all 0.2s ease;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
     }
 
     .rp-tab:hover {
@@ -1895,21 +1901,42 @@
         display: block !important;
         width: 100% !important;
         background: var(--panel);
-        padding: 15px 15px 120px;
-        /* Strong bottom padding to fix cutoff */
+        padding: 15px 15px 100px;
         border-top: 1px solid var(--border);
         height: auto !important;
         position: relative !important;
         overflow-y: auto !important;
-        min-height: 600px !important;
+      }
+
+      .chat-container {
+        height: 320px !important;
+      }
+
+      .chat-msg {
+        max-width: 92% !important;
+        font-size: 12px !important;
+      }
+
+      .chat-input-wrap {
+        padding: 8px !important;
+      }
+
+      .quick-tips {
+        margin-bottom: 20px;
+      }
+
+      .ks-card {
+        padding: 16px !important;
+      }
+
+      .tb-logo {
+        gap: 6px !important;
       }
 
       .rpanel-tabs {
         margin-bottom: 15px;
-      }
-
-      .ks-card {
-        flex-direction: column;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
       }
 
       .mobile-tabs {
@@ -2096,6 +2123,95 @@
       }
     }
 
+    /* --- AI Oracle Chat --- */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      margin-top: 15px;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 15px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .msg-ai {
+      align-self: flex-start;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: #fff;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--t1);
+    }
+    .chat-input-wrap {
+      padding: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    .chat-send {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+    }
+    .quick-tips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tip-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--t2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tip-btn:hover {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
     /* Scrollbar */
     ::-webkit-scrollbar {
       width: 4px;
@@ -2119,6 +2235,91 @@
       scrollbar-width: thin;
       scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* --- News & Recommendations --- */
+    .news-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .news-card:hover {
+      background: rgba(139, 92, 246, 0.08);
+      border-color: rgba(139, 92, 246, 0.3);
+      transform: translateY(-2px);
+    }
+    .news-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--t3);
+      margin-bottom: 6px;
+    }
+    .news-title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--t1);
+    }
+    .news-desc {
+      font-size: 11px;
+      color: var(--t2);
+      margin-top: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .rec-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.05));
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+    .rec-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+      transform: scale(1.02);
+    }
+    .rec-icon {
+      width: 40px; height: 40px;
+      background: rgba(139, 92, 246, 0.15);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .rec-info { flex: 1; min-width: 0; }
+    .rec-ticker { font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rec-name { font-size: 11px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rec-badge {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;
+    }
+    .strong-buy { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+    .buy { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+    .watch { background: rgba(245, 158, 11, 0.1); color: var(--yellow); }
+    .spec { background: rgba(100, 116, 139, 0.1); color: var(--t2); }
+
+    /* Mobile adjustments for news and recs */
+    @media (max-width: 600px) {
+      .rec-card { padding: 10px; gap: 8px; }
+      .rec-icon { width: 32px; height: 32px; font-size: 16px; }
+      .rec-ticker { font-size: 13px; }
+      .news-title { font-size: 12px; }
     }
   </style>
 </head>
@@ -2183,11 +2384,13 @@
       </div>
 
       <div class="tb-actions">
-        <button class="tbbtn" onclick="alert('Indicators panel — toggle from bar below')">
-          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 18h18v-2H3zm0-5h18v-2H3zm0-7v2h18V6z" />
-          </svg>
-          Indicators
+        <div id="userBadge" style="display:none; align-items:center; gap:8px; margin-right:12px; font-size:11px; color:var(--t2);">
+          <i class="fa-solid fa-user-circle" style="font-size:14px; color:var(--accent);"></i>
+          <span id="userEmail"></span>
+        </div>
+        <button class="tbbtn" onclick="handleLogout()" title="Sign Out">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Logout
         </button>
         <button class="theme-toggle theme-btn" id="themeBtn" title="Toggle theme">
           <svg id="themeIcon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
@@ -2311,10 +2514,20 @@
         <div class="rinfo-scroll">
           <!-- Dashboard Tabs -->
           <div class="rpanel-tabs">
-            <div class="rp-tab active" onclick="setRTab(this, 'market-tab')">Technicals</div>
-            <div class="rp-tab" id="aiTabBtn" onclick="setRTab(this, 'ai-tab')"
-              style="display:flex; align-items:center; justify-content:center; gap:4px;">
-              <span style="pointer-events:none">🤖</span> <span style="pointer-events:none">AI Prediction</span>
+            <div class="rp-tab active" onclick="setRTab(this, 'market-tab')">
+              <span>📊</span><span>Technicals</span>
+            </div>
+            <div class="rp-tab" onclick="setRTab(this, 'ai-tab')">
+              <span>🤖</span><span>Signals</span>
+            </div>
+            <div class="rp-tab" onclick="setRTab(this, 'oracle-tab')">
+              <span>🔮</span><span>Oracle</span>
+            </div>
+            <div class="rp-tab" onclick="setRTab(this, 'news-tab'); loadNews();">
+              <span>📰</span><span>News</span>
+            </div>
+            <div class="rp-tab" onclick="setRTab(this, 'picks-tab'); loadRecommendations();">
+               <span>⭐</span><span>Top Picks</span>
             </div>
           </div>
 
@@ -2447,6 +2660,20 @@
       </div>
 
       <script>
+        /* ── AUTH GUARD ── */
+        (async function checkAuth() {
+          try {
+            const res = await fetch('/api/auth/status', { credentials: 'same-origin' });
+            const data = await res.json();
+            if (!data.logged_in) {
+              window.location.replace('/login');
+            }
+          } catch (e) {
+            // If server unreachable, redirect to login as a safety measure
+            window.location.replace('/login');
+          }
+        })();
+
         /* ── THEME ── */
         const themeBtn = document.getElementById('themeBtn');
         const themeIcon = document.getElementById('themeIcon');
@@ -2648,6 +2875,11 @@
             renderHeader(d);
             renderIndBar(d);
             renderRight(d);
+            
+            // Refresh news if tab is active
+            if (document.getElementById('news-tab').classList.contains('active')) {
+              loadNews();
+            }
           } catch (e) { console.error(e); }
         }
 
@@ -2985,14 +3217,15 @@
               expectEl.innerHTML = `This ticker has a <b>${summary.win_rate}% historical win rate</b>. Expect a typical hold of <b>${latest.horizon}</b> with an average target return of <b>${summary.avg_return}%</b>.`;
             }
 
+            const hasHistory = summary.total_trades > 0;
             summaryEl.innerHTML = `
             <div class="pred-stat" style="background:rgba(0,192,135,0.05); border:1px solid rgba(0,192,135,0.1)">
-              <div class="ps-val" style="color:var(--green)">${summary.win_rate}%</div>
-              <div class="ps-lbl">Accuracy</div>
+              <div class="ps-val" style="color:var(--green)">${hasHistory ? summary.win_rate + '%' : 'Monitoring'}</div>
+              <div class="ps-lbl">${hasHistory ? 'Accuracy' : 'Status'}</div>
             </div>
             <div class="pred-stat" style="background:rgba(41,98,255,0.05); border:1px solid rgba(41,98,255,0.1)">
-              <div class="ps-val" style="color:var(--accent)">${summary.avg_return > 0 ? '+' : ''}${summary.avg_return}%</div>
-              <div class="ps-lbl">Avg Gain</div>
+              <div class="ps-val" style="color:var(--accent)">${hasHistory ? (summary.avg_return > 0 ? '+' : '') + summary.avg_return + '%' : 'Calculating...'}</div>
+              <div class="ps-lbl">${hasHistory ? 'Avg Gain' : 'Target'}</div>
             </div>
           `;
 
@@ -3003,8 +3236,8 @@
               <div class="glass-card" style="padding:10px; border-radius:8px; background:rgba(255,255,255,0.02)">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                   <span style="font-weight:700; font-size:12px; color:var(--t1)">${s.buy_date}</span>
-                  <span style="font-weight:800; font-size:12px; color:${isWin ? 'var(--green)' : 'var(--red)'}">
-                    ${s.actual_return != null ? (isWin ? '+' : '') + s.actual_return + '%' : 'PENDING'}
+                  <span style="font-weight:800; font-size:12px; padding: 2px 6px; border-radius: 4px; background: ${s.actual_return != null ? (isWin ? 'rgba(0,192,135,0.1)' : 'rgba(239,83,80,0.1)') : 'rgba(139,92,246,0.1)'}; color: ${s.actual_return != null ? (isWin ? 'var(--green)' : 'var(--red)') : 'var(--accent)'}">
+                    ${s.actual_return != null ? (isWin ? '+' : '') + s.actual_return + '%' : 'ACTIVE'}
                   </span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--t2);">
@@ -3026,6 +3259,159 @@
           } catch (e) {
             console.error("Prediction Display Error:", e);
             predPanel.style.display = 'none';
+          }
+        }
+
+        /* ── AI ORACLE CHAT ── */
+        async function sendChatMessage(query = null) {
+          const input = document.getElementById('chatInput');
+          const msg = query || input.value.trim();
+          if (!msg || !activeTicker) return;
+
+          const box = document.getElementById('chatBox');
+          
+          // User message
+          const uDiv = document.createElement('div');
+          uDiv.className = 'chat-msg msg-user';
+          uDiv.textContent = msg;
+          box.appendChild(uDiv);
+          if (!query) input.value = '';
+          box.scrollTop = box.scrollHeight;
+
+          // Thinking...
+          const tDiv = document.createElement('div');
+          tDiv.className = 'chat-msg msg-ai';
+          tDiv.innerHTML = '<div class="spin" style="width:12px;height:12px;display:inline-block;margin-right:8px"></div>Consulting database...';
+          box.appendChild(tDiv);
+          box.scrollTop = box.scrollHeight;
+
+          try {
+            const r = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ticker: activeTicker, query: msg })
+            });
+            const d = await r.json();
+            tDiv.innerHTML = d.response.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+          } catch (e) {
+            tDiv.textContent = "Error connecting to Oracle.";
+          }
+          box.scrollTop = box.scrollHeight;
+        }
+
+        // Add Oracle content to static HTML when activeTicker changes
+        const oracleHTML = `
+          <div id="oracle-tab" class="tab-content" style="padding-top:10px">
+            <div class="pf-head" style="margin-bottom:4px">Database Oracle AI</div>
+            <div class="pf-sub" style="margin-bottom:15px">Ask questions backed by 30 years of local stock data.</div>
+            
+            <div class="chat-container">
+              <div class="chat-messages" id="chatBox">
+                <div class="chat-msg msg-ai">Welcome. I am the Database Oracle. Ask me about technicals, price levels, or future forecasts for the active stock.</div>
+              </div>
+              <div class="chat-input-wrap">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask Oracle..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                <button class="chat-send" onclick="sendChatMessage()">
+                  <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="quick-tips">
+              <button class="tip-btn" onclick="sendChatMessage('Is this stock currently overbought?')">Is it overbought?</button>
+              <button class="tip-btn" onclick="sendChatMessage('What is the best future month to buy?')">Best future month?</button>
+              <button class="tip-btn" onclick="sendChatMessage('Compare price to MA20')">Price vs MA20</button>
+            </div>
+          </div>
+        `;
+        document.querySelector('.rinfo-scroll').insertAdjacentHTML('beforeend', oracleHTML);
+
+        // Add News and Picks placeholders once
+        const extraTabsHTML = `
+          <div id="news-tab" class="tab-content" style="padding-top:10px"></div>
+          <div id="picks-tab" class="tab-content" style="padding-top:10px"></div>
+        `;
+        document.querySelector('.rinfo-scroll').insertAdjacentHTML('beforeend', extraTabsHTML);
+
+        /* ── NEWS ── */
+        async function loadNews() {
+          const container = document.getElementById('news-tab');
+          if (!container) return;
+          
+          container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--t3)"><div class="spin" style="margin:0 auto 10px"></div>Fetching live market news...</div>';
+          
+          try {
+            const ticker = activeTicker || "";
+            const res = await fetch(`/api/news?ticker=${ticker}`);
+            const data = await res.json();
+            
+            if (!data.articles || data.articles.length === 0) {
+              container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--t3)">No recent news found.</div>';
+              return;
+            }
+            
+            let html = `<div class="rp-title" style="margin-bottom:15px">Latest ${data.ticker} News</div>`;
+            data.articles.forEach(a => {
+              const dateStr = new Date(a.published).toLocaleDateString(undefined, {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+              html += `
+                <a href="${a.link}" target="_blank" class="news-card">
+                  <div class="news-meta">
+                    <span>${a.source}</span>
+                    <span>${dateStr}</span>
+                  </div>
+                  <div class="news-title">${a.title}</div>
+                  <div class="news-desc">${a.description}</div>
+                </a>
+              `;
+            });
+            container.innerHTML = html;
+          } catch (e) {
+            container.innerHTML = '<div style="padding:20px; color:var(--red)">Failed to load news content.</div>';
+          }
+        }
+
+        /* ── RECOMMENDATIONS ── */
+        async function loadRecommendations() {
+          const container = document.getElementById('picks-tab');
+          if (!container) return;
+          
+          container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--t3)"><div class="spin" style="margin:0 auto 10px"></div>Generating AI picks...</div>';
+          
+          try {
+            const res = await fetch('/api/recommendations');
+            const data = await res.json();
+            
+            if (!data.recommendations || data.recommendations.length === 0) {
+              container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--t3)">No recommendations available yet. Try running the forecast pipeline.</div>';
+              return;
+            }
+            
+            let html = `
+              <div class="rp-title" style="margin-bottom:4px">Top AI Picks</div>
+              <div style="font-size:11px; color:var(--t3); margin-bottom:20px">Based on latest LSTM V4 model synergy (As of ${data.as_of})</div>
+            `;
+            
+            data.recommendations.forEach(r => {
+              html += `
+                <div class="rec-card" onclick="selectTicker('${r.ticker}')" style="cursor:pointer">
+                  <div class="rec-icon">🎯</div>
+                  <div class="rec-info">
+                    <div class="rec-ticker">
+                      ${r.ticker} 
+                      <span class="rec-badge ${r.rating_cls}">${r.rating}</span>
+                    </div>
+                    <div class="rec-name">${r.name}</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:14px; font-weight:700">$${r.latest_close || '—'}</div>
+                    <div style="font-size:10px; color:var(--accent); font-weight:700">${r.horizon} ${r.confidence}%</div>
+                  </div>
+                </div>
+              `;
+            });
+            container.innerHTML = html;
+          } catch (e) {
+            container.innerHTML = '<div style="padding:20px; color:var(--red)">Failed to generate recommendations.</div>';
           }
         }
 
@@ -3138,6 +3524,36 @@
         /* ── BOOT ── */
         initChart();
         loadSidebar();
+        // Check auth status
+        async function checkAuth() {
+          try {
+            const r = await fetch('/api/auth/status');
+            const d = await r.json();
+            if (!d.logged_in) {
+              window.location.href = '/login';
+              return;
+            }
+            if (d.user && d.user.email) {
+              document.getElementById('userBadge').style.display = 'flex';
+              document.getElementById('userEmail').textContent = d.user.email;
+            }
+          } catch (e) {
+            console.error("Auth check failed", e);
+          }
+        }
+
+        async function handleLogout() {
+          if (!confirm("Are you sure you want to log out?")) return;
+          try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+          } catch (e) {
+            alert("Logout failed. Please check your connection.");
+          }
+        }
+
+        // Run on startup
+        checkAuth();
         setupMobileLayout();
       </script>
     </div>

@@ -35,9 +35,9 @@ def fetch_data_yfinance(tickers):
     import yfinance as yf
     print(f"[yfinance] Fetching data for {len(tickers)} tickers...")
     
-    # Download 1 year of data for all tickers efficiently
+    # Download 30 years of data for all tickers efficiently
     # group_by='ticker' ensures we can iterate through the top level columns easily
-    df = yf.download(tickers, period="2y", group_by="ticker", auto_adjust=False, threads=True)
+    df = yf.download(tickers, period="30y", group_by="ticker", auto_adjust=False, threads=True)
     
     for ticker in tickers:
         try:
@@ -105,6 +105,11 @@ def pipeline_job():
         
     run_feature_processing()
     run_predictions()
+    
+    # Ingest new CSV data to SQLite DB
+    print("\n--- Ingesting to Database ---")
+    subprocess.run([sys.executable, "ingest_to_db.py"])
+    print("--- Ingestion Complete ---\n")
     
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Pipeline Run Finished.")
 

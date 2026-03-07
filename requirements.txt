@@ -132,3 +132,5 @@ yfinance==0.2.66
 youtube-transcript-api==0.6.2
 zipp==3.19.2
 schedule
+gunicorn
+psycopg2-binary

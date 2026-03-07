@@ -2,4 +2,18 @@
 config.json
 .venv/
 __pycache__/
-TrainingData/indicators_data/
+TrainingData/
+cache/
+
+# Large data files
+stock_data.db
+forecasts/
+
+# Environment and IDE
+.env
+.vscode/
+
+# Build and local data
+*.log
+stockvision-deploy/
+2026-01-01

@@ -1895,21 +1895,42 @@
         display: block !important;
         width: 100% !important;
         background: var(--panel);
-        padding: 15px 15px 120px;
-        /* Strong bottom padding to fix cutoff */
+        padding: 15px 15px 100px;
         border-top: 1px solid var(--border);
         height: auto !important;
         position: relative !important;
         overflow-y: auto !important;
-        min-height: 600px !important;
+      }
+
+      .chat-container {
+        height: 320px !important;
+      }
+
+      .chat-msg {
+        max-width: 92% !important;
+        font-size: 12px !important;
+      }
+
+      .chat-input-wrap {
+        padding: 8px !important;
+      }
+
+      .quick-tips {
+        margin-bottom: 20px;
+      }
+
+      .ks-card {
+        padding: 16px !important;
+      }
+
+      .tb-logo {
+        gap: 6px !important;
       }
 
       .rpanel-tabs {
         margin-bottom: 15px;
-      }
-
-      .ks-card {
-        flex-direction: column;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
       }
 
       .mobile-tabs {
@@ -2094,6 +2115,95 @@
         opacity: 0.8;
         transform: scale(1.2) translate(-20px, -20px);
       }
+    }
+
+    /* --- AI Oracle Chat --- */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      margin-top: 15px;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 15px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .msg-ai {
+      align-self: flex-start;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: #fff;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--t1);
+    }
+    .chat-input-wrap {
+      padding: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    .chat-send {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+    }
+    .quick-tips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tip-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--t2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tip-btn:hover {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--accent);
+      color: #fff;
     }
 
     /* Scrollbar */
@@ -2312,9 +2422,13 @@
           <!-- Dashboard Tabs -->
           <div class="rpanel-tabs">
             <div class="rp-tab active" onclick="setRTab(this, 'market-tab')">Technicals</div>
-            <div class="rp-tab" id="aiTabBtn" onclick="setRTab(this, 'ai-tab')"
+            <div class="rp-tab" onclick="setRTab(this, 'ai-tab')"
               style="display:flex; align-items:center; justify-content:center; gap:4px;">
-              <span style="pointer-events:none">🤖</span> <span style="pointer-events:none">AI Prediction</span>
+              <span style="pointer-events:none">🤖</span> <span style="pointer-events:none">Signals</span>
+            </div>
+            <div class="rp-tab" onclick="setRTab(this, 'oracle-tab')"
+              style="display:flex; align-items:center; justify-content:center; gap:4px;">
+              <span style="pointer-events:none">🔮</span> <span style="pointer-events:none">Oracle</span>
             </div>
           </div>
 
@@ -2985,14 +3099,15 @@
               expectEl.innerHTML = `This ticker has a <b>${summary.win_rate}% historical win rate</b>. Expect a typical hold of <b>${latest.horizon}</b> with an average target return of <b>${summary.avg_return}%</b>.`;
             }
 
+            const hasHistory = summary.total_trades > 0;
             summaryEl.innerHTML = `
             <div class="pred-stat" style="background:rgba(0,192,135,0.05); border:1px solid rgba(0,192,135,0.1)">
-              <div class="ps-val" style="color:var(--green)">${summary.win_rate}%</div>
-              <div class="ps-lbl">Accuracy</div>
+              <div class="ps-val" style="color:var(--green)">${hasHistory ? summary.win_rate + '%' : 'Monitoring'}</div>
+              <div class="ps-lbl">${hasHistory ? 'Accuracy' : 'Status'}</div>
             </div>
             <div class="pred-stat" style="background:rgba(41,98,255,0.05); border:1px solid rgba(41,98,255,0.1)">
-              <div class="ps-val" style="color:var(--accent)">${summary.avg_return > 0 ? '+' : ''}${summary.avg_return}%</div>
-              <div class="ps-lbl">Avg Gain</div>
+              <div class="ps-val" style="color:var(--accent)">${hasHistory ? (summary.avg_return > 0 ? '+' : '') + summary.avg_return + '%' : 'Calculating...'}</div>
+              <div class="ps-lbl">${hasHistory ? 'Avg Gain' : 'Target'}</div>
             </div>
           `;
 
@@ -3003,8 +3118,8 @@
               <div class="glass-card" style="padding:10px; border-radius:8px; background:rgba(255,255,255,0.02)">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                   <span style="font-weight:700; font-size:12px; color:var(--t1)">${s.buy_date}</span>
-                  <span style="font-weight:800; font-size:12px; color:${isWin ? 'var(--green)' : 'var(--red)'}">
-                    ${s.actual_return != null ? (isWin ? '+' : '') + s.actual_return + '%' : 'PENDING'}
+                  <span style="font-weight:800; font-size:12px; padding: 2px 6px; border-radius: 4px; background: ${s.actual_return != null ? (isWin ? 'rgba(0,192,135,0.1)' : 'rgba(239,83,80,0.1)') : 'rgba(139,92,246,0.1)'}; color: ${s.actual_return != null ? (isWin ? 'var(--green)' : 'var(--red)') : 'var(--accent)'}">
+                    ${s.actual_return != null ? (isWin ? '+' : '') + s.actual_return + '%' : 'ACTIVE'}
                   </span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--t2);">
@@ -3028,6 +3143,70 @@
             predPanel.style.display = 'none';
           }
         }
+
+        /* ── AI ORACLE CHAT ── */
+        async function sendChatMessage(query = null) {
+          const input = document.getElementById('chatInput');
+          const msg = query || input.value.trim();
+          if (!msg || !activeTicker) return;
+
+          const box = document.getElementById('chatBox');
+          
+          // User message
+          const uDiv = document.createElement('div');
+          uDiv.className = 'chat-msg msg-user';
+          uDiv.textContent = msg;
+          box.appendChild(uDiv);
+          if (!query) input.value = '';
+          box.scrollTop = box.scrollHeight;
+
+          // Thinking...
+          const tDiv = document.createElement('div');
+          tDiv.className = 'chat-msg msg-ai';
+          tDiv.innerHTML = '<div class="spin" style="width:12px;height:12px;display:inline-block;margin-right:8px"></div>Consulting database...';
+          box.appendChild(tDiv);
+          box.scrollTop = box.scrollHeight;
+
+          try {
+            const r = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ticker: activeTicker, query: msg })
+            });
+            const d = await r.json();
+            tDiv.innerHTML = d.response.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+          } catch (e) {
+            tDiv.textContent = "Error connecting to Oracle.";
+          }
+          box.scrollTop = box.scrollHeight;
+        }
+
+        // Add Oracle content to static HTML when activeTicker changes
+        const oracleHTML = `
+          <div id="oracle-tab" class="tab-content" style="padding-top:10px">
+            <div class="pf-head" style="margin-bottom:4px">Database Oracle AI</div>
+            <div class="pf-sub" style="margin-bottom:15px">Ask questions backed by 30 years of local stock data.</div>
+            
+            <div class="chat-container">
+              <div class="chat-messages" id="chatBox">
+                <div class="chat-msg msg-ai">Welcome. I am the Database Oracle. Ask me about technicals, price levels, or future forecasts for the active stock.</div>
+              </div>
+              <div class="chat-input-wrap">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask Oracle..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                <button class="chat-send" onclick="sendChatMessage()">
+                  <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="quick-tips">
+              <button class="tip-btn" onclick="sendChatMessage('Is this stock currently overbought?')">Is it overbought?</button>
+              <button class="tip-btn" onclick="sendChatMessage('What is the best future month to buy?')">Best future month?</button>
+              <button class="tip-btn" onclick="sendChatMessage('Compare price to MA20')">Price vs MA20</button>
+            </div>
+          </div>
+        `;
+        document.querySelector('.rinfo-scroll').insertAdjacentHTML('beforeend', oracleHTML);
 
         /* ── PERIOD BUTTONS ── */
         document.querySelectorAll('.ivbtn').forEach(btn => {
