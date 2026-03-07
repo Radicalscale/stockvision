@@ -208,9 +208,10 @@ def get_stock_data(ticker):
         dates = []
         
         for row in rows:
-            dates.append(row["date"])
+            d_str = str(row["date"])
+            dates.append(d_str)
             candles.append({
-                "date": row["date"],
+                "date": d_str,
                 "open": round(float(row["open"]), 4) if row["open"] is not None else None,
                 "high": round(float(row["high"]), 4) if row["high"] is not None else None,
                 "low": round(float(row["low"]), 4) if row["low"] is not None else None,
@@ -315,11 +316,11 @@ def get_predictions(ticker):
                 (ticker, r["buy_date"])
             ).fetchone()
             
-            buy_price = round(float(price_row["close"]), 2) if price_row and price_row["close"] else "N/A"
+            buy_price = round(float(price_row["close"]), 2) if price_row and price_row["close"] is not None else "N/A"
             
             signals.append({
-                "buy_date": r["buy_date"],
-                "sell_date": r["sell_date"],
+                "buy_date": str(r["buy_date"]),
+                "sell_date": str(r["sell_date"]) if r["sell_date"] else None,
                 "horizon": r["horizon"],
                 "days_held": r["days_held"],
                 "confidence": round(float(r["pred_prob"] or 0) * 100, 1),
@@ -352,8 +353,12 @@ def get_predictions(ticker):
             horizon = best_signal['horizon']
             
             # 2. Map horizon to a future human date/month
-            from datetime import datetime, timedelta
-            base_date = datetime.strptime(latest_date, "%Y-%m-%d")
+            from datetime import datetime, date, timedelta
+            if isinstance(latest_date, date):
+                base_date = datetime.combine(latest_date, datetime.min.time())
+            else:
+                base_date = datetime.strptime(str(latest_date), "%Y-%m-%d")
+            
             h_map = {"1d": 1, "1w": 7, "1m": 30, "6m": 180}
             future_date = base_date + timedelta(days=h_map.get(horizon, 1))
             best_month = future_date.strftime("%B %Y")
@@ -719,8 +724,8 @@ def get_recommendations():
                 "confidence":   conf,
                 "rating":       rating,
                 "rating_cls":   rating_cls,
-                "latest_close": round(float(r["latest_close"]), 2) if r["latest_close"] else None,
-                "buy_date":     r["buy_date"]
+                "latest_close": round(float(r["latest_close"]), 2) if r["latest_close"] is not None else None,
+                "buy_date":     str(r["buy_date"])
             })
             if len(recs) >= 5:
                 break
