@@ -1,6 +1,6 @@
 # 🚀 Setup Guide — AI Stock Predictor + Dashboard
 
-This guide walks you through setting up the project from scratch on a new Windows computer, even if you've never used Python before.
+This guide walks you through setting up the automated local LSTM AI stock predictor and the corresponding Railway Deployment Dashboard.
 
 ---
 
@@ -25,13 +25,12 @@ This guide walks you through setting up the project from scratch on a new Window
 
 ## ✅ Step 2 — Download the Project
 
-If you don't have it yet, download or clone this project folder to your computer.
+If you don't have it yet, download or clone this project from your GitHub.
 
 Open **PowerShell** and navigate to the project folder:
 ```powershell
 cd "C:\path\to\LSTM_AI_Stock_Predictor-main"
 ```
-> Replace the path above with wherever you saved the project.
 
 ---
 
@@ -52,90 +51,90 @@ You should see a new `.venv` folder appear in the project directory.
 ```powershell
 .\.venv\Scripts\pip install --upgrade pip
 .\.venv\Scripts\pip install -r requirements.txt
-.\.venv\Scripts\pip install flask flask-cors alpha_vantage
+.\.venv\Scripts\pip install -r stockvision-deploy/requirements.txt
 ```
 
-This may take **5–15 minutes** depending on your internet speed.
+This installs all required Machine Learning bindings (TensorFlow, Keras) and Web Framework dependencies (Flask, Pandas, yfinance). It may take **5–15 minutes**.
 
 ---
 
-## ✅ Step 5 — Configure Your API Key
+## ✅ Step 5 — Configure Your Data Provider
 
-The downloader needs a free **AlphaVantage** API key to fetch stock data.
+By default, the AI pipeline uses **yfinance** for high-speed, free stock data fetching across your entire `stockList.csv`.
 
+If you wish to switch to Alpha Vantage:
 1. Get a free key at: 👉 https://www.alphavantage.co/support/#api-key
 2. Copy the file `config.example.json` and rename it to `config.json`
 3. Open `config.json` and paste your key:
    ```json
    {
-       "ALPHA_VANTAGE_KEY": "YOUR_KEY_HERE"
+       "ALPHA_VANTAGE_KEY": "YOUR_KEY_HERE",
+       "DATA_PROVIDER": "alpha_vantage"
    }
    ```
+4. If you leave `DATA_PROVIDER` as `"yfinance"`, it will use Yahoo Finance for free.
 
 ---
 
-## ✅ Step 6 — Download & Process Stock Data
+## 🤖 Step 6 — Run the Automated AI Pipeline
 
-> Only needed if you want to generate fresh data. The project already includes sample data.
+To start generating predictions on autopilot every 30 minutes, simply run the master script:
 
-**Step 6a — Download raw data:**
-```powershell
-.\.venv\Scripts\python TrainingData/downloader.py
+```bash
+.\.venv\Scripts\python local_pipeline.py
 ```
-> This can take a long time (hours) depending on how many stocks are in `TrainingData/stockList.csv`.
 
-**Step 6b — Process into indicator CSVs:**
-```powershell
-.\.venv\Scripts\python TrainingData/processor.py
-```
-> Output goes to `TrainingData/indicators_data/processed/stocksData/`
+This single command orchestrates everything:
+1. **Fetching**: Downloads historical price action for all 2000+ stocks.
+2. **Feature Engineering**: Auto-calculates Volatility, RSI, MACD, Moving Averages.
+3. **AI Inference**: Standardizes the math, loads `lstm_model.h5`, and outputs predictions to `forecasts/`.
+4. **Rescheduling**: Sleeps and auto-repeats the whole process every 30 minutes.
 
 ---
 
-## 🖥️ Step 7 — Launch the Stock Dashboard
+## 🖥️ Step 7 — Launch the Local Stock Dashboard
+
+You can view the results of the pipeline directly on your laptop. Open a new terminal tab and run:
 
 ```powershell
-.\.venv\Scripts\python dashboard\app.py
+.\.venv\Scripts\python stockvision-deploy\app.py
 ```
 
 Then open your browser and go to:
 👉 **http://localhost:5050**
 
-You should see the full exchange-style chart dashboard!
-
 ---
 
-## 📓 Step 8 — Run the Forecasting Notebook (Optional)
+## ☁️ Step 8 — Push Predictions to Live Railway App
 
-Open **`run_forecast_v4.ipynb`** in VS Code or Jupyter:
+Your live application on Railway automatically hosts from your GitHub repository. 
 
-```powershell
-.\.venv\Scripts\jupyter notebook run_forecast_v4.ipynb
+Whenever your `local_pipeline.py` finishes generating fresh data arrays and predictions on your laptop, you can immediately send those new numbers up to your live Railway website by running this command:
+
+```bash
+.\.venv\Scripts\python stockvision-deploy\railway_sync.py
 ```
 
-This trains the LSTM model and outputs predictions to `/forecasts/`.
+*Note: You must have the Railway CLI installed (`npm install -g @railway/cli`) and be logged in to your account (`railway login`) for the live sync bridge to work.*
 
 ---
 
 ## 🗂️ Project Structure
 
-```
+```text
 LSTM_AI_Stock_Predictor-main/
-├── dashboard/                  ← Web dashboard (Flask + HTML)
+├── stockvision-deploy/         ← Railway Deployment Environment (Backend + UI)
 │   ├── app.py                  ← Backend API server
-│   └── static/index.html       ← Frontend UI
+│   ├── railway_sync.py         ← Pushes fresh local data to Railway cloud
+│   ├── static/index.html       ← Frontend UI Dashboard
+│   └── data/                   ← Where the local AI generated CSVs are stored
 ├── TrainingData/
-│   ├── downloader.py           ← Downloads raw stock data
-│   ├── processor.py            ← Generates technical indicators
-│   ├── stockList.csv           ← List of tickers to download
-│   └── indicators_data/
-│       └── processed/stocksData/  ← Processed CSV files (one per ticker)
-├── forecasts/                  ← Model predictions output here
-├── run_forecast_v4.ipynb       ← Jupyter notebook for training & forecasting
-├── run_backtest_v4.py          ← Backtest script
-├── config.json                 ← Your AlphaVantage API key (create this)
-├── config.example.json         ← API key template
-└── requirements.txt            ← Python package list
+│   ├── downloader.py           ← Legacy raw downloader scripts
+│   ├── processor.py            ← Mathematical Indicator features script
+│   └── stockList.csv           ← List of all 2000+ active tickers
+├── local_pipeline.py           ← ★ Master AI Pipeline & Task Scheduler
+├── forecasts/                  ← Directory storing 1d, 1w, 1m, 6m predictions
+└── lstm_model.h5               ← The trained Neural Network Weights
 ```
 
 ---
@@ -144,19 +143,7 @@ LSTM_AI_Stock_Predictor-main/
 
 | Task | Command |
 |---|---|
-| Start dashboard | `.\.venv\Scripts\python dashboard\app.py` |
-| Download new data | `.\.venv\Scripts\python TrainingData/downloader.py` |
-| Process raw data | `.\.venv\Scripts\python TrainingData/processor.py` |
-| Run backtest | `.\.venv\Scripts\python run_backtest_v4.py` |
-
----
-
-## 🛠️ Troubleshooting
-
-| Problem | Solution |
-|---|---|
-| `'py' is not recognized` | Reinstall Python 3.10 and check "Add to PATH" |
-| `ModuleNotFoundError` | Run `pip install -r requirements.txt` again |
-| Dashboard not loading | Make sure `app.py` is running and visit `http://localhost:5050` |
-| API rate limit errors | AlphaVantage free tier allows 25 requests/day. Wait or upgrade plan |
-| Port 5050 already in use | Change `port=5050` in `dashboard/app.py` to another port like `5051` |
+| **Start AI Autopilot** | `.\.venv\Scripts\python local_pipeline.py` |
+| View Local Dashboard | `.\.venv\Scripts\python stockvision-deploy\app.py` |
+| **Sync Live Website** | `.\.venv\Scripts\python stockvision-deploy\railway_sync.py` |
+| Train New Model | `.\.venv\Scripts\jupyter notebook run_forecast_v4.ipynb` |
