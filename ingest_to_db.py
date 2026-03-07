@@ -17,7 +17,20 @@ DB_PATH           = os.path.join(BASE_DIR, "stock_data.db")
 NAMES_FILE        = os.path.join(BASE_DIR, "stockvision-deploy", "company_names.json")
 
 def get_db_connection():
+    # Priority 1: Environment Variable
+    # Priority 2: config.json
     db_url = os.environ.get("DATABASE_URL")
+    
+    if not db_url:
+        config_path = os.path.join(BASE_DIR, "config.json")
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, "r") as f:
+                    cfg = json.load(f)
+                    db_url = cfg.get("DATABASE_URL")
+            except Exception:
+                pass
+
     if db_url:
         import psycopg2
         from psycopg2.extras import RealDictCursor

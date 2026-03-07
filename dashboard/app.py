@@ -39,7 +39,8 @@ class PgConnWrapper:
     def execute(self, sql, params=()):
         # Convert ? to %s for PostgreSQL
         sql = sql.replace('?', '%s')
-        cur = self._conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # Use RealDictCursor to ensure rows are actual dictionaries
+        cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute(sql, params)
         return cur
 
@@ -92,6 +93,20 @@ def init_auth_db():
 
 # Initialize DB on start
 init_auth_db()
+
+# Global error handler for 500 errors
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Pass through HTTP errors
+    if hasattr(e, 'code') and e.code < 500:
+        return jsonify({"error": str(e)}), e.code
+    # Log the full traceback for 500 errors
+    traceback.print_exc()
+    return jsonify({
+        "error": "Internal Server Error",
+        "message": str(e),
+        "traceback": traceback.format_exc() if app.debug or os.environ.get("DEBUG") else None
+    }), 500
 
 # ── ROUTES ───────────────────────────────────────────────────────────────────
 
