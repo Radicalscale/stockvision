@@ -174,7 +174,7 @@ def get_stock_data(ticker):
                 WHERE ticker = ? 
                 ORDER BY date DESC 
                 LIMIT ?
-            ) ORDER BY date ASC
+            ) as sub ORDER BY date ASC
         """
         rows = conn.execute(data_query, (ticker, limit)).fetchall()
         
@@ -193,7 +193,7 @@ def get_stock_data(ticker):
                 WHERE ticker = ? 
                 ORDER BY date DESC 
                 LIMIT 252
-            )
+            ) as sub
         """
         stats_row = conn.execute(stats_query, (ticker,)).fetchone()
         conn.close()
