@@ -21,12 +21,11 @@ except ImportError:
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "stock_data.db")
+
+app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.secret_key = "super-secret-key-change-this-in-production" # Secure session key
 app.permanent_session_lifetime = datetime.timedelta(hours=8)  # Sessions expire after 8 hours
 CORS(app)
-
-BASE_DIR = os.path.dirname(__file__)
-DB_PATH = os.path.join(BASE_DIR, "..", "stock_data.db")
 
 import functools
 
