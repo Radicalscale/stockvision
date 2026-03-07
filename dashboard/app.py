@@ -50,6 +50,9 @@ class PgConnWrapper:
 def get_db_connection():
     db_url = os.environ.get("DATABASE_URL")
     if db_url:
+        # Handle Railway's potentially different connection string formats
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
         conn = psycopg2.connect(db_url)
         return PgConnWrapper(conn)
     else:
