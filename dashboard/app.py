@@ -12,8 +12,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 import traceback
 import sys
+import json
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
-app = Flask(__name__, static_folder="static", static_url_path="/static")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "stock_data.db")
 app.secret_key = "super-secret-key-change-this-in-production" # Secure session key
 app.permanent_session_lifetime = datetime.timedelta(hours=8)  # Sessions expire after 8 hours
 CORS(app)
@@ -55,14 +62,33 @@ def is_pg(conn):
     return isinstance(conn, PgConnWrapper) or not isinstance(conn, sqlite3.Connection)
 
 def get_db_connection():
+    # Priority 1: Environment Variable
     db_url = os.environ.get("DATABASE_URL")
+    
+    # Priority 2: config.json in root
+    if not db_url:
+        config_path = os.path.join(BASE_DIR, "config.json")
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, "r") as f:
+                    cfg = json.load(f)
+                    db_url = cfg.get("DATABASE_URL")
+            except Exception:
+                pass
+
     if db_url:
         # Handle Railway's potentially different connection string formats
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql://", 1)
         conn = psycopg2.connect(db_url)
+        # Use RealDictCursor to ensure rows are actual dictionaries
         return PgConnWrapper(conn)
     else:
+        # Fallback to local SQLite only if we're not on Railway (check for PORT env var)
+        is_railway = os.environ.get("PORT") is not None
+        if is_railway:
+            raise Exception("DATABASE_URL not found in environment or config.json. PostgreSQL is required for Railway.")
+            
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         return conn
