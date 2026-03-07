@@ -19,8 +19,10 @@ try:
 except ImportError:
     pass
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "stock_data.db")
+DIR_PATH = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(DIR_PATH)
+STATIC_DIR = os.path.join(DIR_PATH, "static")
+DB_PATH = os.path.join(ROOT_DIR, "stock_data.db")
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.secret_key = "super-secret-key-change-this-in-production" # Secure session key
@@ -66,7 +68,7 @@ def get_db_connection():
     
     # Priority 2: config.json in root
     if not db_url:
-        config_path = os.path.join(BASE_DIR, "config.json")
+        config_path = os.path.join(ROOT_DIR, "config.json")
         if os.path.exists(config_path):
             try:
                 with open(config_path, "r") as f:
@@ -584,8 +586,7 @@ def index():
         return redirect(url_for("login_page"))
         
     print("[DEBUG] Serving Dashboard index.html")
-    static_dir = os.path.join(BASE_DIR, "static")
-    resp = make_response(send_from_directory(static_dir, "index.html"))
+    resp = make_response(send_from_directory(STATIC_DIR, "index.html"))
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     resp.headers['Pragma'] = 'no-cache'
     resp.headers['Expires'] = '0'
@@ -737,8 +738,7 @@ def get_recommendations():
 def login_page():
     if "user_id" in session:
         return redirect(url_for("index"))
-    static_dir = os.path.join(BASE_DIR, "static")
-    return send_from_directory(static_dir, "auth.html")
+    return send_from_directory(STATIC_DIR, "auth.html")
 
 # ── STARTUP ───────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
