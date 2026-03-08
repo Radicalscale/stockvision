@@ -221,7 +221,9 @@ def get_stock_data(ticker):
             })
             
             for ind in indicators_data.keys():
-                val = row[ind]
+                # PostgreSQL is case-sensitive and columns are lowercase
+                db_col = ind.lower()
+                val = row[db_col] if db_col in row else row.get(ind)
                 indicators_data[ind].append(round(float(val), 4) if val is not None else None)
 
         latest = rows[-1]
@@ -324,8 +326,8 @@ def get_predictions(ticker):
                 "sell_date": str(r["sell_date"]) if r["sell_date"] else None,
                 "horizon": r["horizon"],
                 "days_held": r["days_held"],
-                "confidence": round(float(r["pred_prob"] or 0) * 100, 1),
-                "adj_confidence": round(float(r["adj_prob"] or 0) * 100, 1),
+                "confidence": round(float(r.get("pred_prob") or r.get("confidence") or 0) * 100, 1),
+                "adj_confidence": round(float(r.get("adj_prob") or r.get("adj_confidence") or 0) * 100, 1),
                 "actual_return": round(float(r["actual_return"]), 2) if r["actual_return"] is not None else None,
                 "buy_price": buy_price
             })
